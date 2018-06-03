@@ -1,0 +1,118 @@
+body {
+    background-image : url("&&&");
+    background-size : 100%;
+    background-position : left top;
+}
+.module {
+    background-color: #FFFFFF;
+}
+.newsDiv {
+    background-color: #D3D3D3;
+    border: 1px solid #BEBEBE;
+    margin-top : 2%;
+    padding: 1%;
+}
+#searchBar {
+    height : 20%;
+    margin-top: 2%;
+}
+#completeList {
+  z-index: 9999;
+}
+.form-control:focus.ng-invalid {
+    border-color: red;
+    box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.075) inset, 0px 0px 8px rgba(255, 0, 0, 0.5);
+}
+.glyphicon-star {
+    color: yellow;
+}
+.fb-btn {
+    width: 40px;
+    height: 36px;
+    background-image: url("&&&");
+    background-size: 90%;
+    background-position: 2px center;
+    background-repeat: no-repeat;
+}
+.arrow {
+    width: 5%;
+}
+.autoCompleteList {
+    position: absolute;
+    top : 20;
+    width: 95%;
+}
+.panel {
+    margin-top: 2%;
+}
+.alert {
+    margin-top: 2%;
+}
+.bootstrap-select.btn-group.show-tick .dropdown-menu li.selected a span.check-mark {
+    position: relative;
+    display: inline-block;
+    right: 15px;
+    left:2px;
+}
+.bootstrap-select.btn-group.show-tick .dropdown-menu li a span.text {
+    margin-right: 34px;
+}
+.switchItemRelative {
+    position: relative;
+    height:1000px;
+    overflow: hidden;
+}
+.switchItem1 {
+    position: absolute;
+    width: 96%;
+    display: block;
+}
+.switchItem2 {
+    position: absolute;
+    width: 96%;
+    display: block;
+}
+.switchItem1.ng-enter, .switchItem1.ng-leave {
+    -webkit-transition: 300ms linear all;
+    -moz-transition: 300ms linear all;
+    -ms-transition: 300ms linear all;
+    -o-transition: 300ms linear all;
+    transition: 300ms linear all;
+}
+.switchItem1.ng-enter {
+    left: 100%;
+}
+.switchItem1.ng-enter-active {
+    left: 0;
+}
+.switchItem1.ng-leave {
+    left: 0;
+}
+.switchItem1.ng-leave-active {
+    left: -100%;
+}
+.switchItem2.ng-enter, .switchItem2.ng-leave {
+    -webkit-transition: 300ms linear all;
+    -moz-transition: 300ms linear all;
+    -ms-transition: 300ms linear all;
+    -o-transition: 300ms linear all;
+    transition: 300ms linear all;
+}
+.switchItem2.ng-enter {
+    right: 100%;
+}
+.switchItem2.ng-enter-active {
+    right: 0;
+}
+.switchItem2.ng-leave {
+    right: 0;
+}
+.switchItem2.ng-leave-active {
+     right: -100%;
+}
+li:hover {
+    background-color:#f9f9f9;
+}
+hr {
+    width : 90%;
+}

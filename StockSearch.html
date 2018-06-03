@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Stock Market Search</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+        <meta name="Author" content="Lidan Yang">
+        <meta name="Tool Used" content="Sublime Text">
+        <meta charset="utf-8">
+    </head>
+<body ng-app="mainApp" ng-controller="mainCtrl">
+<style ng-bind-html="selectBoxStyle"></style>
+<script>
+    window.fbAsyncInit = function() {
+        FB.init({
+          appId: '2009737722606140',
+          xfbml: true,
+          version: 'v2.11'
+        });
+    };
+    (function(d, s, id){
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) {return;}
+        js = d.createElement(s); js.id = id;
+        js.src = "https://connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+</script>
+<div class="img-rounded module container" id="searchBar">
+    <div style="text-align: center;"><h4><B>Stock Market Search</B></h4></div>
+
+    <form class="form-inline row" name="inputForm" id="inputForm" novalidate>
+        <div class="col-md-3 col-xs-12"><B>Enter Stock Ticker Symbol:</B><span style="color : red">*</span></div>
+        <div class="col-md-6 col-xs-12" ng-cloak>
+            <input type="text" name="symbol" ng-model="symbol" class="form-control" id="inputTextBox" placeholder="e.g. AAPL" style="width:100%" ng-required="true" ng-keyup="complete(symbol, inputForm)" autocomplete="off">
+            <p><span ng-show="inputForm.symbol.$invalid && inputForm.symbol.$touched">please input a valid symbol</span></p>
+            <ul class="list-group autoCompleteList" ng-model="hideSelectList" ng-hide="hideSelectList" id="completeList">
+                <li class="list-group-item" ng-repeat="symbolData in filterSymbol track by $index" ng-click="fillTextbox(symbolData)">{{symbolData}}</li>
+            </ul>
+            
+        </div>
+        <div class="col-md-3 col-xs-12">
+          <button class="btn btn-info" ng-disabled="inputForm.symbol.$invalid" ng-click="quote(symbol)">
+            <span class="glyphicon glyphicon-search"></span> Get Quote 
+            </button>
+            <button class="btn" ng-click="clear()">
+                <span class="glyphicon glyphicon-refresh"></span> Clear 
+            </button>
+        </div>
+    </form> <br>
+</div>
+<div class="container">
+    <hr style="width: 100%">
+</div>
+<div class="img-rounded module container switchItemRelative" ng-switch on="ngSwitchSelected">
+<div class="img-rounded switchItem1" ng-switch-when="item1">
+    <div class="panel panel-default">
+    <div class="panel-heading">
+        <span class="panel-title"><B>Favorite List</B></span>
+        <button class="btn btn-default pull-right"><span class="glyphicon glyphicon-menu-right" ng-click="changeItem()"></span></button>
+        <button class="btn btn-default pull-right" ng-click="refreshStockDetail()"><span class="glyphicon glyphicon-refresh"></span></button>
+        <span class="pull-right"><span class="hidden-xs">Automatic Refresh: </span><toggle ng-model="toggleValue" ng-change="changeAutoRefresh()"></toggle></span>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-1 col-xs-12"><strong>Sort By</strong></div>
+            <div class="col-md-2 col-xs-12">
+                <div class="form-group">
+                    <select ng-model="chosenSortOption" ng-change="changeFavoriteListOrder(chosenSortOption, chosenOrderOption)" class="form-control" id="sortSelect">
+                        <option value="id">Default</option>
+                        <option value="symbol">Symbol</option>
+                        <option value="price">Price</option>
+                        <option value="change">Change</option>
+                        <option value="percent">Change Percent</option>
+                        <option value="volume">Volume</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-1 col-xs-12"><strong>Order</strong></div>
+            <div class="col-md-2 col-xs-12">
+                <div class="form-group">
+                    <select ng-model="chosenOrderOption" ng-change="changeFavoriteListOrder(chosenSortOption, chosenOrderOption)" class="form-control" ng-disabled="disableOrder">
+                        <option value="Ascending">Ascending</option>
+                        <option value="Descending">Descending</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <table class="table table-striped row">
+            <tr>
+              <th class="col-md-2 col-xs-2">Symbol</th>
+              <th class="col-md-2 col-xs-2">Stock Price</th>
+              <th class="col-md-2 col-xs-2">Change (Change Percent)</th>
+              <th class="col-md-2 col-xs-2">Volume</th>
+              <th class="col-md-2 col-xs-2">  </th>
+            </tr>
+            <tr ng-repeat="item in favoriteListData">
+                <td class="col-md-2 col-xs-2"><button type="button" class="btn btn-link" ng-click="redrawCharts(item.symbol)">{{item.symbol}}</button></td>
+                <td class="col-md-2 col-xs-2">{{item.price}}</td>
+                <td ng-style="{color : item.color}" class="col-md-4 col-xs-4">{{item.change + " (" + item.percent + ")"}}
+                 <span ng-switch="item.color">
+                    <span ng-switch-when="green"><img class="arrow" src='http://cs-server.usc.edu:45678/hw/hw8/images/Up.png'></span>
+                    <span ng-switch-when="red"><img class="arrow" src='http://cs-server.usc.edu:45678/hw/hw8/images/Down.png'></span>
+                </span>
+                </td>
+                <td class="col-md-2 col-xs-2">{{item.volume}}</td>
+                <td class="col-md-2 col-xs-2"><button class="btn btn-default" ng-click="deleteFromFavoriteList(item.id)"><span class="glyphicon glyphicon-trash"></span></button></td>
+            </tr>
+        </table>
+    </div>
+</div>
+</div>
+<div class="img-rounded switchItem2" ng-switch-when="item2">
+    <div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title text-center">
+            <button class="btn btn-default pull-left"><span class="glyphicon glyphicon-menu-left" ng-click="changeItem()"></span></button>
+            <span class="panel-title"><B>Stock Details</B></span>
+        </div>
+        
+    </div>
+    <div class="panel-body">
+        <div>
+            <ul class="nav nav-pills">
+                <li ng-class="{active : currentActive}" ng-click="showCurrent()"><a><span class="glyphicon glyphicon-dashboard"></span><span class="hidden-xs">Current</span> Stock </a></li>
+                <li ng-class="{active : historicalActive}" ng-click="showHistory()"><a><span class="glyphicon glyphicon-stats"></span><span class="hidden-xs">Historical</span> Charts </a></li>
+                <li ng-class="{active : newsActive}" ng-click="showNews()"><a><span class="glyphicon glyphicon-link"></span> News<span class="hidden-xs"> Feeds</span> </a></li>
+            </ul>
+        </div>
+        <div class="row" ng-hide="hideCurrent">
+            <div class="col-md-6 col-xs-12">
+                 <table class="table table-striped">
+                    <thead>
+                        <tr>
+                          <th><h4>Stock Details</h4></th>
+                          <th><span class="pull-right">
+                            <button class="btn btn-default" ng-click="changeFavoriteStatus()">
+                                <span class="glyphicon glyphicon-star" ng-show="hasBeenInFavoriteList"></span>
+                                <span class="glyphicon glyphicon-star-empty" ng-show="!hasBeenInFavoriteList"></span>
+                            </button>
+                            <button class="btn btn-default fb-btn" ng-click="fbShare(chartActive)"></button>
+                        </span></th>
+                        </tr>
+                    </thead>
+                </table>
+                <div ng-switch="detailErrorOrRegular">
+                <div ng-switch-when="error" class="img-rounded alert alert-danger">
+                    Error! Failed to get current stock data.
+                </div>
+                <div ng-switch-when="regular">
+                    <div class="progress progress-striped active" ng-hide="hideStockDetailProgressBar">
+                        <div class="progress-bar progress-bar-info" role="progressbar" style="width: 50%;">
+                            <span class="sr-only">detail progress bar</span>
+                        </div>
+                    </div>
+                    <table class="table table-striped" ng-hide="!hideStockDetailProgressBar">
+                        <tbody>
+                            <tr ng-repeat="(key, val) in detailStatisticData" class="row">
+                                <td class="col-md-6 col-xs-6">{{key}}</td>
+                                <td ng-style="{color : (key=='Change (Change Percent)') ? stockChangeColor : 'black'}">{{val}}<span ng-show="key=='Change (Change Percent)'"><img class="arrow" ng-hide="hideArrow" src='http://cs-server.usc.edu:45678/hw/hw8/images/Up.png'><img class="arrow" ng-hide="!hideArrow" src='http://cs-server.usc.edu:45678/hw/hw8/images/Down.png'></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xs-12">
+                <ul class="nav nav-tabs">
+                <li ng-class="{active : chartActive == 'price'}" ng-click="chartActive = 'price'; drawPriceChart();"><a>Price</a></li>
+                <li ng-class="{active : chartActive == 'SMA'}" ng-click="chartActive = 'SMA'; drawChart('SMA');"><a>SMA</a></li>
+                <li ng-class="{active : chartActive == 'EMA'}" ng-click="chartActive = 'EMA'; drawChart('EMA');"><a>EMA</a></li>
+                <li ng-class="{active : chartActive == 'STOCH'}" ng-click="chartActive = 'STOCH'; drawChart('STOCH');"><a>STOCH</a></li>
+                <li ng-class="{active : chartActive == 'RSI'}" ng-click="chartActive = 'RSI'; drawChart('RSI');"><a>RSI</a></li>
+                <li ng-class="{active : chartActive == 'ADX'}" ng-click="chartActive = 'ADX'; drawChart('ADX');"><a>ADX</a></li>
+                <li ng-class="{active : chartActive == 'CCI'}" ng-click="chartActive = 'CCI'; drawChart('CCI');"><a>CCI</a></li>
+                <li ng-class="{active : chartActive == 'BBANDS'}" ng-click="chartActive = 'BBANDS'; drawChart('BBANDS');"><a>BBANDS</a></li>
+                <li ng-class="{active : chartActive == 'MACD'}" ng-click="chartActive = 'MACD'; drawChart('MACD');"><a>MACD</a></li>
+                </ul>
+                <div ng-show="chartActive == 'price'">
+                    <div ng-switch="priceErrorOrRegular">
+                    <div ng-switch-when="error" class="img-rounded alert alert-danger">
+                        Error! Failed to get Price data.
+                    </div>
+                    <div ng-switch-when="regular">
+                        <div class="progress progress-striped active" ng-hide="hidePriceProgressBar">
+                            <div class="progress-bar progress-bar-info" role="progressbar" style="width: 50%;">
+                            <span class="sr-only">detail progress bar</span>
+                            </div>
+                        </div>
+                        <div ng-hide="!hidePriceProgressBar">
+                            <div id="priceChart"></div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                <div ng-show="chartActive == 'SMA'">
+                    <div ng-switch="SMAErrorOrRegular">
+                    <div ng-switch-when="error" class="img-rounded alert alert-danger">
+                        Error! Failed to get SMA data.
+                    </div>
+                    <div ng-switch-when="regular">
+                        <div class="progress progress-striped active" ng-hide="hideSMAProgressBar">
+                            <div class="progress-bar progress-bar-info" role="progressbar" style="width: 50%;">
+                            <span class="sr-only">detail progress bar</span>
+                            </div>
+                        </div>
+                        <div ng-hide="!hideSMAProgressBar">
+                            <div id="SMAChart"></div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                <div ng-show="chartActive == 'EMA'">
+                    <div ng-switch="EMAErrorOrRegular">
+                    <div ng-switch-when="error" class="img-rounded alert alert-danger">
+                        Error! Failed to get EMA data.
+                    </div>
+                    <div ng-switch-when="regular">
+                        <div class="progress progress-striped active" ng-hide="hideEMAProgressBar">
+                            <div class="progress-bar progress-bar-info" role="progressbar" style="width: 50%;">
+                            <span class="sr-only">detail progress bar</span>
+                            </div>
+                        </div ng-hide="!hideEMAProgressBar">
+                        <div>
+                            <div id="EMAChart"></div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                <div ng-show="chartActive == 'STOCH'">
+                    <div ng-switch="STOCHErrorOrRegular">
+                    <div ng-switch-when="error" class="img-rounded alert alert-danger">
+                        Error! Failed to get STOCH data.
+                    </div>
+                    <div ng-switch-when="regular">
+                        <div class="progress progress-striped active" ng-hide="hideSTOCHProgressBar">
+                            <div class="progress-bar progress-bar-info" role="progressbar" style="width: 50%;">
+                            <span class="sr-only">detail progress bar</span>
+                            </div>
+                        </div>
+                        <div ng-hide="!hideSTOCHProgressBar">
+                            <div id="STOCHChart"></div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                <div ng-show="chartActive == 'RSI'">
+                    <div ng-switch="RSIErrorOrRegular">
+                    <div ng-switch-when="error" class="img-rounded alert alert-danger">
+                        Error! Failed to get RSI data.
+                    </div>
+                    <div ng-switch-when="regular">
+                        <div class="progress progress-striped active" ng-hide="hideRSIProgressBar">
+                            <div class="progress-bar progress-bar-info" role="progressbar" style="width: 50%;">
+                            <span class="sr-only">detail progress bar</span>
+                            </div>
+                        </div>
+                        <div ng-hide="!hideRSIProgressBar">
+                            <div id="RSIChart"></div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                <div ng-show="chartActive == 'ADX'">
+                    <div ng-switch="ADXErrorOrRegular">
+                    <div ng-switch-when="error" class="img-rounded alert alert-danger">
+                        Error! Failed to get ADX data.
+                    </div>
+                    <div ng-switch-when="regular">
+                        <div class="progress progress-striped active" ng-hide="hideADXProgressBar">
+                            <div class="progress-bar progress-bar-info" role="progressbar" style="width: 50%;">
+                            <span class="sr-only">detail progress bar</span>
+                            </div>
+                        </div>
+                        <div ng-hide="!hideADXProgressBar">
+                            <div id="ADXChart"></div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                <div ng-show="chartActive == 'CCI'">
+                    <div ng-switch="CCIErrorOrRegular">
+                    <div ng-switch-when="error" class="img-rounded alert alert-danger">
+                        Error! Failed to get CCI data.
+                    </div>
+                    <div ng-switch-when="regular">
+                        <div class="progress progress-striped active" ng-hide="hideCCIProgressBar">
+                            <div class="progress-bar progress-bar-info" role="progressbar" style="width: 50%;">
+                            <span class="sr-only">detail progress bar</span>
+                            </div>
+                        </div>
+                        <div ng-hide="!hideCCIProgressBar">
+                            <div id="CCIChart"></div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                <div ng-show="chartActive == 'BBANDS'">
+                    <div ng-switch="BBANDSErrorOrRegular">
+                    <div ng-switch-when="error" class="img-rounded alert alert-danger">
+                        Error! Failed to get BBANDS data.
+                    </div>
+                    <div ng-switch-when="regular">
+                        <div class="progress progress-striped active" ng-hide="hideBBANDSProgressBar">
+                            <div class="progress-bar progress-bar-info" role="progressbar" style="width: 50%;">
+                            <span class="sr-only">detail progress bar</span>
+                            </div>
+                        </div>
+                        <div ng-hide="!hideBBANDSProgressBar">
+                            <div id="BBANDSChart"></div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                <div ng-show="chartActive == 'MACD'">
+                    <div ng-switch="MACDErrorOrRegular">
+                    <div ng-switch-when="error" class="img-rounded alert alert-danger">
+                        Error! Failed to get MACD data.
+                    </div>
+                    <div ng-switch-when="regular">
+                        <div class="progress progress-striped active" ng-hide="hideMACDProgressBar">
+                            <div class="progress-bar progress-bar-info" role="progressbar" style="width: 50%;">
+                            <span class="sr-only">detail progress bar</span>
+                            </div>
+                        </div>
+                        <div ng-hide="!hideMACDProgressBar">
+                            <div id="MACDChart"></div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div ng-hide="hideHistory">
+            <div ng-switch="HistoryErrorOrRegular">
+            <div ng-switch-when="error" class="img-rounded alert alert-danger">
+                Error! Failed to get historical charts data.
+            </div>
+            <div ng-switch-when="regular">
+                <div class="progress progress-striped active" ng-hide="hideHistoryProgressBar">
+                    <div class="progress-bar progress-bar-info" role="progressbar" style="width: 50%;">
+                    <span class="sr-only">detail progress bar</span>
+                    </div>
+                </div>
+                <div ng-hide="!hideHistoryProgressBar">
+                    <div id="historyChart"></div>
+                </div>
+            </div>
+            </div>
+        </div>
+        <div ng-hide="hideNews">
+            <div ng-switch="NewsErrorOrRegular">
+            <div ng-switch-when="error" class="img-rounded alert alert-danger">
+                Error! Failed to get news feed data.
+            </div>
+            <div ng-switch-when="regular">
+                <div class="progress progress-striped active" ng-hide="hideNewsProgressBar">
+                    <div class="progress-bar progress-bar-info" role="progressbar" style="width: 50%;">
+                    <span class="sr-only">detail progress bar</span>
+                    </div>
+                </div>
+                <div ng-hide="!hideNewsProgressBar">
+                    <div ng-repeat="article in newsData" ng-model="newsData" class="img-rounded newsDiv">
+                    <h4><a href="{{article.link}}" target="_blank">{{article.title}}</a></h4><br>
+                    <p><B>Author: {{article.author}}</B></p>
+                    <p><B>Date: {{article.pubDate}}</B></p>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+<link type = "text/css" href="./StockSearch.css" rel="stylesheet">
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+<script src="http://cdn.static.runoob.com/libs/angular.js/1.4.6/angular-animate.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ngStorage/0.3.10/ngStorage.min.js"></script>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js"></script>
+
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+<link href="./angular-bootstrap-toggle.min.css" rel="stylesheet">
+<script src="./angular-bootstrap-toggle.min.js"></script>
+
+<script type="text/javascript" src="./StockSearch.js"></script>
+
+</body>
+</html>
