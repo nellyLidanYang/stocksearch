@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+</head>
+<body>
+<div id="historyChart">aa</div>
+</body>
+<script>
+    //var Symbol = (window.location.search.substring(1)).split("=")[1];
+    var dd;
+    function drawChart(msg){
+        msg = msg.split("@");
+        var sym = msg[0];
+        var d = JSON.parse(msg[1]);
+        d = d.JSONdata;
+        Highcharts.stockChart('historyChart', {
+            rangeSelector: {
+                allButtonsEnabled: true,
+                buttons: [{
+                    type: 'month',
+                    count: 1,
+                    text: '1m',
+                }, {
+                    type: 'month',
+                    count: 3,
+                    text: '3m'
+                }, {
+                    type: 'month',
+                    count: 6,
+                    text: '6m'
+                }, {
+                    type: 'year',
+                    count: 1,
+                    text: '1y'
+                }, {
+                    type: 'all',
+                    text: 'All'
+                }],
+                selected: 1
+            },
+            title: {
+                text: sym + ' Stock Value'
+            },
+            subtitle: {
+                useHTML: true,
+                text: '<a style="color:blue;cursor:pointer" target="_blank" href="https://www.alphavantage.co/">Source: Alpha Vantage</a>'
+            },
+            xAxis: {
+                tickPixelInterval: 20
+            },
+            yAxis: {
+                title: {
+                    text: "Stock Value"
+                }
+            },
+            series: [{
+                    name: sym,
+                    data: d,
+                    type: "area"
+                }],
+                plotOptions: {
+                    series: {
+                        marker: {
+                            enabled: false,
+                        },
+                        lineWidth: 1
+                    }
+                },
+                tooltip: {
+                    formatter: function() {
+                        var date = new Date(this.x);
+                        var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                        var dayName = days[date.getDay()];
+                        var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+                        var monthName = months[date.getMonth()];
+                        var day = date.getDate();
+                        var hour = date.getHours();
+                        var showDate = dayName + ", " + monthName + " " + day + ", " + hour + ":00";
+                        return showDate + "<br/><span style=\"color:#ADD8E6\">\u25CF</span>"+ sym + ':<b>' + this.y + "</b>";
+                    }
+                }
+            });
+    }
+</script>
+</html>

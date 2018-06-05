@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainLinearLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/restaurant"
+    tools:context=".MainActivity" >
+
+    <FrameLayout
+        android:id="@+id/AutoCompleteProgressBar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:visibility="gone">
+        <ProgressBar
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:layout_gravity="center"/>
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+    <TextView
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:textSize="30dp"
+        android:textColor="#FFF"
+        android:text="Stock Market Search"/>
+
+    <AutoCompleteTextView
+        android:id="@+id/atv_content"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:completionThreshold="1"
+        android:textColor="#FFF"
+        android:inputType="textNoSuggestions" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/Quote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAllCaps="false"
+            android:background="@android:color/transparent"
+            android:textSize="25dp"
+            android:textColor="#000080"
+            android:onClick="getQuote"
+            android:text="Get Quote"/>
+        <Button
+            android:id="@+id/Clear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAllCaps="false"
+            android:background="@android:color/transparent"
+            android:textSize="25dp"
+            android:textColor="#000080"
+            android:onClick="clearInput"
+            android:text="Clear"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:layout_weight="1"
+            android:textSize="25dp"
+            android:textColor="#FFF"
+            android:text="Favorites"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="right|center_vertical"
+                android:layout_weight="1"
+                android:textSize="18dp"
+                android:textColor="#FFF"
+                android:text="AutoRefresh"/>
+            <android.support.v7.widget.SwitchCompat
+                android:id="@+id/AutoSwitch"
+                android:layout_width="50dp"
+                android:gravity="center"
+                android:layout_height="match_parent"/>
+            <Button
+                android:id="@+id/ManualRefresh"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@drawable/refresh"
+                android:onClick="ManualRefreshFunction"/>
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="30dp">
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_weight="1"/>
+        <Spinner
+            android:id="@+id/SortList"
+            android:layout_height="30dp"
+            android:layout_width="0dp"
+            android:layout_weight="3"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_weight="1"/>
+        <Spinner
+            android:id="@+id/OrderList"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_weight="3"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/favoriteListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+    </ListView>
+    </LinearLayout>
+</RelativeLayout>

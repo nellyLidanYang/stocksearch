@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+</head>
+<body>
+<div id="indicatorChart"></div>
+<button onclick="callAndroid()"></button>
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+    var dd;
+    var chartContent;
+    var chartURL;
+    function callme(){
+        alert(dd);
+    }
+
+    function callAndroid(){
+        Android.hello("js call java!");
+    }
+
+    function drawPriceChart(msg){
+        msg = msg.split("@");
+        var sym = msg[0];
+        var d = JSON.parse(msg[1]);
+        dd = d;
+        var Series = [];
+        Series.push({
+            name: sym,
+            type: "area",
+            data: d.price,
+            yAxis: 0,
+            color: "#ADD8E6",
+            lineColor: '#000080'
+        });
+        Series.push({
+            name: sym + " Volume",
+            type: "column",
+            data: d.volume,
+            yAxis: 1,
+            color: "#FF0000"
+        });
+        chartContent = {
+            chart: {
+                zoomType: 'x'
+            },
+            title: {
+                text: sym + " Stock Price and Volume",
+            },
+            subtitle: {
+                useHTML: true,
+                text: '<a style="color:blue;" target="_blank" href="https://www.alphavantage.co/">Source: Alpha Vantage</a>'
+            },
+            xAxis: {
+                categories: d.dates,
+                tickInterval: 5,
+                startOnTick: false
+            },
+            tooltip: {
+                formatter: function() {
+                    if(this.series.name == sym){
+                        return  this.x + "<br/><span style=\"color:" + this.color + "\">\u25CF</span> <b>" + this.series.name + '</b>: ' + Highcharts.numberFormat(this.y, 2);
+                    // to disable the tooltip at a point return false
+                    }else {
+                        return  this.x + "<br/><span style=\"color:" + this.color + "\">\u25CF</span> <b>" + this.series.name + '</b>: ' + Highcharts.numberFormat(this.y, 0, '.', ' ');
+                    }
+                }
+            },
+            yAxis: [
+                {
+                    title: {
+                        text: "Stock Price"
+                    }
+                },
+                {
+                    title: {
+                        text: "Volume"
+                    },
+                    opposite: true,
+                    min: 0,
+                    tickInterval: 50000000
+                }
+            ],
+            series: Series,
+            plotOptions: {
+                series: {
+                    lineWidth: 1,
+                    marker: {
+                        enabled: false
+                    }
+                }
+            }
+        };
+        Highcharts.chart('indicatorChart', chartContent);
+    }
+    function drawChart(msg){
+        msg = msg.split("@");
+        var sym = msg[0];
+        var indi = msg[1];
+        var d = JSON.parse(msg[2]);
+        var Series = [];
+        var chartTitle;
+        if(indi == "SMA"){
+            chartTitle = "Simple Moving Average (SMA)";
+        } else if(indi == "EMA"){
+            chartTitle = "Exponential Moving Average (EMA)";
+        } else if(indi == "STOCH"){
+            chartTitle = "Stochastic (STOCH)";
+        } else if(indi == "RSI"){
+            chartTitle = "Relative Strength Index (RSI)";
+        } else if(indi == "ADX"){
+            chartTitle = "Average Directional Index (ADX)";
+        } else if(indi == "CCI"){
+            chartTitle = "Commodity Channel Index (CCI)";
+        } else if(indi == "BBANDS"){
+            chartTitle = "Bollinger Bands (BBANDS)";
+        } else {
+            chartTitle = "Moving Average Convergence/Divergence(MACD)";
+        }
+        for(fieldName in d.JSONdata){
+            var n = sym + " " + fieldName;
+            Series.push({
+                name: n,
+                data: d.JSONdata[fieldName]
+            });
+        }
+        chartContent = {
+            chart: {
+                zoomType: 'x'
+            },
+            title: {
+                text: chartTitle
+            },
+            subtitle: {
+                useHTML: true,
+                text: '<a style="color:blue;cursor:pointer" target="_blank" href="https://www.alphavantage.co/">Source: Alpha Vantage</a>'
+            },
+            xAxis: {
+                categories: d.dates,
+                tickInterval: 5
+            },
+            yAxis: {
+                title: {
+                    text: indi
+                }
+            },
+            plotOptions: {
+                series: {
+                    marker: {
+                        enabled: true,
+                        radius: 2
+                    },
+                    lineWidth: 1
+                }
+            },
+            tooltip: {
+                formatter: function() {
+                    return  this.x + "<br/><span style=\"color:" + this.color + "\">\u25CF</span> <b>"+this.series.name + '</b>: ' + Highcharts.numberFormat(this.y, 2);
+                }
+            },
+            series: Series
+        };
+        Highcharts.chart('indicatorChart', chartContent);
+    }
+    function getImageUrl(){
+        $.get(
+            "http://stocksearch-env-lidanyang.us-west-1.elasticbeanstalk.com/ChartConvert",
+            {chartString : JSON.stringify(chartContent)},
+            function(data) {
+                chartURL = "http://export.highcharts.com/" + data.JSONdata;
+                Android.getChartURL(chartURL);
+               //alert('page content: ' + data);
+            }
+        );
+    }
+</script>
+</html>
